@@ -21,8 +21,8 @@ My personal [pi](https://github.com/badlogic/pi) configuration: extensions, skil
 ## Bootstrap a new machine
 
 ```bash
-git clone git@github.com:victorlga/dotpi.git ~/Playground/dotpi
-cd ~/Playground/dotpi
+git clone git@github.com:victorlga/dotpi.git
+cd dotpi
 ./install.sh
 ```
 
@@ -56,14 +56,14 @@ After it finishes: open pi and run `/reload` (or just start a new session).
 # Edit anywhere — through ~/.pi/agent/... or directly in the repo
 $EDITOR ~/.pi/agent/extensions/answer.ts   # same file as repo
 
-cd ~/Playground/dotpi
+cd /path/to/dotpi
 git add -A && git commit -m "tweak answer prompt" && git push
 ```
 
 On the other machine:
 
 ```bash
-cd ~/Playground/dotpi && git pull
+cd /path/to/dotpi && git pull
 # If a new extension/skill with deps was added:
 ./install.sh
 ```
