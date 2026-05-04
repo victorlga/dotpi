@@ -86,6 +86,11 @@ echo
 echo "  4. Personalize AGENTS.md (loaded as a context file on every session):"
 echo "        \$EDITOR ${REPO_DIR}/AGENTS.md"
 echo
-echo "  5. After future updates on another machine:"
+echo "  5. Per-project templates (NOT auto-linked, copy as needed):"
+echo "        ls ${REPO_DIR}/templates/"
+echo "     For example, in a project that has a .pi/ dir:"
+echo "        cp ${REPO_DIR}/templates/REVIEW_GUIDELINES.md <project>/   # used by /review"
+echo
+echo "  6. After future updates on another machine:"
 echo "        /dotpi-reload      # pulls + re-runs install.sh + reloads pi"
 echo
