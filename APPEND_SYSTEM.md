@@ -18,16 +18,33 @@ After you (the assistant) help the user with any of the following, **commit and 
 - Creating, modifying, or deleting a file under `~/.pi/agent/skills/`
 - Editing `~/.pi/agent/settings.json`
 - Editing `~/.pi/agent/SYSTEM.md`, `~/.pi/agent/APPEND_SYSTEM.md`, or `~/.pi/agent/AGENTS.md`
-- Adding new system-prompt files of the same kinds
+- Adding files under `~/.pi/agent/prompts/` or `~/.pi/agent/themes/`
 
-Workflow:
+### Workflow for EXISTING (already symlinked) files
 
-1. Make the change directly under `~/.pi/agent/...` (or equivalently in the repo path — they're the same files via symlink).
-2. If a new top-level file was added (e.g. a brand-new extension dir, a new skill, a new `AGENTS.md`), run the repo's `install.sh` so the symlink exists.
-3. From the dotpi repo: `git add -A && git commit -m "<concise message>" && git push`.
-4. Mention in your reply that dotpi was updated and pushed.
+1. Edit them at either path — `~/.pi/agent/...` or the repo path. They're the same file.
+2. From the dotpi repo: `git add -A && git commit -m "<concise msg>" && git push`.
+3. Mention in your reply that dotpi was updated and pushed.
 
-If the user explicitly says "don't push" or "local only", skip the push step but still commit. If a commit would be empty (no tracked changes), skip silently.
+### Workflow for NEW files (this is the easy mistake)
+
+`~/.pi/agent/extensions/` and `~/.pi/agent/skills/` are real directories that **contain** symlinks. Creating a file directly inside them produces a regular file that is NOT in the repo — `git add -A` from the repo would silently miss it.
+
+For any new file or directory:
+
+1. Resolve the repo path:
+   ```bash
+   REPO=$(readlink -f ~/.pi/agent/APPEND_SYSTEM.md | xargs dirname)
+   ```
+2. Create the file under the repo path, e.g. `$REPO/extensions/foo.ts` (or `$REPO/skills/foo/SKILL.md`, etc.).
+3. Run `"$REPO/install.sh"` to symlink the new entry into `~/.pi/agent/...` and to run `npm install` if the new entry has a `package.json`.
+4. Then `git -C "$REPO" add -A && git -C "$REPO" commit -m "<msg>" && git -C "$REPO" push`.
+
+### Modifiers
+
+- If the user explicitly says "don't push" or "local only", skip the push step but still commit.
+- If a commit would be empty (no tracked changes), skip silently.
+- If `git push` fails due to auth or network, report the error to the user and leave the local commit in place — do not amend or reset.
 
 ## When NOT to touch dotpi
 

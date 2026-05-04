@@ -15,6 +15,59 @@ echo "==> Target: $PI_DIR"
 
 mkdir -p "$PI_DIR/extensions" "$PI_DIR/skills" "$PI_DIR/prompts" "$PI_DIR/themes"
 
+# ---------------------------------------------------------------------------
+# Preflight: git identity + push auth
+# ---------------------------------------------------------------------------
+WARNINGS=()
+
+GIT_NAME="$(git -C "$REPO_DIR" config --get user.name 2>/dev/null || true)"
+GIT_EMAIL="$(git -C "$REPO_DIR" config --get user.email 2>/dev/null || true)"
+if [[ -z "$GIT_NAME" || -z "$GIT_EMAIL" ]]; then
+  WARNINGS+=("Git identity is not configured. Auto-commits from pi will use system defaults or fail.")
+  WARNINGS+=("  Fix: git config --global user.name 'Your Name'")
+  WARNINGS+=("       git config --global user.email 'you@example.com'")
+fi
+
+if git -C "$REPO_DIR" remote get-url origin >/dev/null 2>&1; then
+  if ! git -C "$REPO_DIR" push --dry-run --quiet origin HEAD 2>/dev/null; then
+    WARNINGS+=("git push to 'origin' failed (auth or network). Auto-pushes from pi will fail.")
+    WARNINGS+=("  Fix: ensure your SSH key is loaded (ssh-add -l) or that your HTTPS token works.")
+  fi
+fi
+
+if [[ ${#WARNINGS[@]} -gt 0 ]]; then
+  echo
+  echo "!! Preflight warnings:"
+  for w in "${WARNINGS[@]}"; do echo "   $w"; done
+  echo
+fi
+
+# ---------------------------------------------------------------------------
+# Self-heal: migrate any non-symlink files in ~/.pi/agent/<dir>/ into the repo
+# Only acts on entries with a name that does not already exist in the repo.
+# ---------------------------------------------------------------------------
+MIGRATED=0
+for sub in extensions skills prompts themes; do
+  [[ -d "$PI_DIR/$sub" ]] || continue
+  shopt -s nullglob dotglob
+  for entry in "$PI_DIR/$sub"/*; do
+    [[ -L "$entry" ]] && continue                  # already a symlink, skip
+    base="$(basename "$entry")"
+    [[ "$base" == .git || "$base" == .DS_Store ]] && continue
+    repo_target="$REPO_DIR/$sub/$base"
+    if [[ -e "$repo_target" ]]; then
+      echo "!! Conflict: both $entry and $repo_target exist. Leaving as-is."
+      continue
+    fi
+    echo "==> Migrating orphan into repo: $entry -> $repo_target"
+    mkdir -p "$REPO_DIR/$sub"
+    mv "$entry" "$repo_target"
+    MIGRATED=$((MIGRATED + 1))
+  done
+  shopt -u dotglob
+done
+[[ $MIGRATED -gt 0 ]] && echo "==> Migrated $MIGRATED orphan entr$( [[ $MIGRATED -eq 1 ]] && echo y || echo ies) into the repo."
+
 link() {
   local src="$1" dst="$2"
   if [[ -L "$dst" ]]; then
