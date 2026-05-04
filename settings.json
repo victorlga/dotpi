@@ -5,6 +5,7 @@
   "defaultThinkingLevel": "medium",
   "theme": "dark",
   "packages": [
-    "npm:@sherif-fanous/pi-rtk"
+    "npm:@sherif-fanous/pi-rtk",
+    "git:github.com/tmustier/pi-extensions"
   ]
 }
