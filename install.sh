@@ -13,7 +13,7 @@ TS="$(date +%Y%m%d-%H%M%S)"
 echo "==> Repo: $REPO_DIR"
 echo "==> Target: $PI_DIR"
 
-mkdir -p "$PI_DIR/extensions" "$PI_DIR/skills"
+mkdir -p "$PI_DIR/extensions" "$PI_DIR/skills" "$PI_DIR/prompts" "$PI_DIR/themes"
 
 link() {
   local src="$1" dst="$2"
@@ -42,6 +42,16 @@ done
 echo "==> Linking skills"
 for entry in "$REPO_DIR/skills"/*; do
   link "$entry" "$PI_DIR/skills/$(basename "$entry")"
+done
+
+echo "==> Linking prompt templates"
+for entry in "$REPO_DIR/prompts"/*.md; do
+  link "$entry" "$PI_DIR/prompts/$(basename "$entry")"
+done
+
+echo "==> Linking themes"
+for entry in "$REPO_DIR/themes"/*.json; do
+  link "$entry" "$PI_DIR/themes/$(basename "$entry")"
 done
 
 echo "==> Installing npm deps where needed"

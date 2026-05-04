@@ -1,0 +1,4 @@
+# Placeholder so the empty `prompts/` directory is tracked in git.
+#
+# Drop `<name>.md` files in here and they become `/<name>` slash commands in pi.
+# See: pi docs → prompt-templates.md

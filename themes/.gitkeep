@@ -1,0 +1,4 @@
+# Placeholder so the empty `themes/` directory is tracked in git.
+#
+# Drop `<name>.json` files in here to register custom themes.
+# See: pi docs → themes.md
