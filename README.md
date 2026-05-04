@@ -13,6 +13,7 @@ My personal [pi](https://github.com/badlogic/pi) configuration: extensions, skil
 ├── AGENTS.md               # ~/.pi/agent/AGENTS.md         (personal context file)
 ├── prompts/                # ~/.pi/agent/prompts/*.md      (custom /<name> templates)
 ├── themes/                 # ~/.pi/agent/themes/*.json     (custom color themes)
+├── templates/              # starter files to copy into projects (not auto-linked)
 ├── extensions/             # ~/.pi/agent/extensions/
 │   ├── answer.ts           # /answer — Q&A extractor (Ctrl+.)
 │   ├── review.ts           # /review — code review modes
