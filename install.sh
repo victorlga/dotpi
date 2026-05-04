@@ -65,4 +65,27 @@ done < <(find "$REPO_DIR/extensions" "$REPO_DIR/skills" \
             -name node_modules -prune -o \
             -name package.json -print0 2>/dev/null)
 
-echo "==> Done. Restart pi (or run /reload) to pick up changes."
+echo
+echo "╔════════════════════════════════════════════════════════════════════════════╗"
+echo "║ install.sh finished. Manual steps below.                                       ║"
+echo "╚═══════════════════════════════════════════════════════════════════════════╝"
+echo
+echo "  1. Sign in to your model provider(s). API keys are NOT synced via dotpi."
+echo "        pi          # then run /login inside pi"
+echo
+echo "  2. Reload the current pi session (or just start a new one):"
+echo "        /reload      # inside an existing pi session"
+echo
+echo "  3. Optional, per-extension/skill prerequisites:"
+echo
+echo "     - extensions/review.ts   PR mode needs: gh auth status   (run 'gh auth login')"
+echo "     - skills/web-browser     needs Google Chrome or Chromium installed"
+echo "                              (override path with BROWSER_BIN=/path/to/chrome)"
+echo "     - skills/mcporter        needs 'mcporter' CLI installed if you use it"
+echo
+echo "  4. Personalize AGENTS.md (loaded as a context file on every session):"
+echo "        \$EDITOR ${REPO_DIR}/AGENTS.md"
+echo
+echo "  5. After future updates on another machine:"
+echo "        /dotpi-reload      # pulls + re-runs install.sh + reloads pi"
+echo
