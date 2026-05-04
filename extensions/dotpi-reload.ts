@@ -45,6 +45,49 @@ async function findRepoDir(): Promise<string> {
 
 const STATUS_KEY = "dotpi";
 
+interface IncomingSummary {
+	ext: number;
+	skill: number;
+	cfg: number;
+}
+
+async function summarizeIncoming(
+	pi: ExtensionAPI,
+	repo: string,
+): Promise<IncomingSummary | null> {
+	const diff = await pi.exec(
+		"git",
+		["-C", repo, "diff", "--name-only", "HEAD..@{u}"],
+		{ timeout: 5_000 },
+	);
+	if (diff.code !== 0) return null;
+	const paths = (diff.stdout || "").split("\n").filter(Boolean);
+	if (paths.length === 0) return null;
+
+	let ext = 0;
+	let skill = 0;
+	let cfg = 0;
+	for (const p of paths) {
+		// Skip noise: README, templates (not auto-applied), node_modules.
+		if (p === "README.md") continue;
+		if (p.startsWith("templates/")) continue;
+		if (p.includes("/node_modules/")) continue;
+
+		if (p.startsWith("extensions/")) ext++;
+		else if (p.startsWith("skills/")) skill++;
+		else cfg++;
+	}
+	return { ext, skill, cfg };
+}
+
+function formatSummary(s: IncomingSummary): string {
+	const parts: string[] = [];
+	if (s.ext > 0) parts.push(`${s.ext} ext`);
+	if (s.skill > 0) parts.push(`${s.skill} skill`);
+	if (s.cfg > 0) parts.push(`${s.cfg} cfg`);
+	return parts.join(", ");
+}
+
 async function checkBehind(pi: ExtensionAPI, repo: string): Promise<number | null> {
 	// Quietly fetch; ignore network failures.
 	const fetchRes = await pi.exec("git", ["-C", repo, "fetch", "--quiet"], { timeout: 15_000 });
@@ -90,9 +133,11 @@ export default function (pi: ExtensionAPI) {
 				return;
 			}
 			const plural = behind === 1 ? "commit" : "commits";
+			const summary = await summarizeIncoming(pi, repo);
+			const detail = summary ? ` (${formatSummary(summary)})` : "";
 			ctx.ui.setStatus(
 				STATUS_KEY,
-				`dotpi: ${behind} ${plural} behind \u2014 /dotpi-reload`,
+				`dotpi: ${behind} ${plural} behind${detail} \u2014 /dotpi-reload`,
 			);
 		})().catch(() => {
 			/* swallow: footer hint is best-effort */
