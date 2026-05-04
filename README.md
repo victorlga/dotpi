@@ -20,7 +20,7 @@ My personal [pi](https://github.com/badlogic/pi) configuration: extensions, skil
 │   └── todos/              # /todos — file-backed todo manager
 └── skills/                 # ~/.pi/agent/skills/
     ├── mcporter/           # invoke MCP server tools as CLI
-    └── web-browser/        # Chrome DevTools Protocol browser control
+
 ```
 
 ## Bootstrap a new machine
