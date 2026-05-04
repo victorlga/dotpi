@@ -28,8 +28,10 @@ link() {
   echo "    link:   $dst -> $src"
 }
 
-echo "==> Linking settings.json"
-[[ -f "$REPO_DIR/settings.json" ]] && link "$REPO_DIR/settings.json" "$PI_DIR/settings.json"
+echo "==> Linking top-level config files"
+for name in settings.json SYSTEM.md APPEND_SYSTEM.md AGENTS.md; do
+  [[ -f "$REPO_DIR/$name" ]] && link "$REPO_DIR/$name" "$PI_DIR/$name"
+done
 
 echo "==> Linking extensions"
 shopt -s nullglob

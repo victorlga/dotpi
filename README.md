@@ -9,6 +9,7 @@ My personal [pi](https://github.com/badlogic/pi) configuration: extensions, skil
 ```
 .
 ├── settings.json           # ~/.pi/agent/settings.json
+├── APPEND_SYSTEM.md        # ~/.pi/agent/APPEND_SYSTEM.md (appended to system prompt)
 ├── extensions/             # ~/.pi/agent/extensions/
 │   ├── answer.ts           # /answer — Q&A extractor (Ctrl+.)
 │   ├── review.ts           # /review — code review modes
