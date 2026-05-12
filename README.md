@@ -25,6 +25,8 @@ My personal [pi](https://github.com/badlogic/pi) configuration: extensions, skil
 
 ## Bootstrap a new machine
 
+Prereq: macOS with [Homebrew](https://brew.sh). Then:
+
 ```bash
 git clone git@github.com:victorlga/dotpi.git
 cd dotpi
@@ -32,12 +34,19 @@ cd dotpi
 ```
 
 `install.sh`:
-- Creates `~/.pi/agent/{extensions,skills}` if missing
-- Symlinks every entry from this repo into `~/.pi/agent/...`
-- Runs `npm install` in any sub-dir that has a `package.json`
-- Backs up any pre-existing non-symlink files as `*.backup.<timestamp>`
+1. Runs `brew bundle` against [`Brewfile`](./Brewfile) (`node`, `git`, `ripgrep`, `gh`).
+2. `npm i -g` the required global tools (`pi`, `lat.md`, `mcporter`).
+3. Creates `~/.pi/agent/{extensions,skills,prompts,themes}` if missing.
+4. Symlinks every entry from this repo into `~/.pi/agent/...`.
+5. Runs `npm install` in any sub-dir that has a `package.json`.
+6. Backs up any pre-existing non-symlink files as `*.backup.<timestamp>`.
 
-After it finishes: open pi and run `/reload` (or just start a new session).
+Set `SKIP_BOOTSTRAP=1` to skip steps 1–2 if you manage prerequisites yourself.
+
+After it finishes:
+- `pi` then `/login` to authenticate your model provider (API keys are **not** synced)
+- Optional: `brew install --cask google-chrome` for the `web-browser` skill
+- In an already-open pi session, `/reload` to pick up changes
 
 ### Prerequisites on the new machine
 

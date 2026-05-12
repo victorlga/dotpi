@@ -16,6 +16,32 @@ echo "==> Target: $PI_DIR"
 mkdir -p "$PI_DIR/extensions" "$PI_DIR/skills" "$PI_DIR/prompts" "$PI_DIR/themes"
 
 # ---------------------------------------------------------------------------
+# Bootstrap: install host prerequisites (brew packages + global npm tools).
+# Skip with SKIP_BOOTSTRAP=1 (e.g. CI, or if you manage these yourself).
+# ---------------------------------------------------------------------------
+if [[ "${SKIP_BOOTSTRAP:-0}" != "1" ]]; then
+  if command -v brew >/dev/null 2>&1; then
+    echo "==> brew bundle"
+    brew bundle --file="$REPO_DIR/Brewfile" --no-lock
+  else
+    echo "!! Homebrew not found. Install it from https://brew.sh, then re-run."
+    echo "   (Or set SKIP_BOOTSTRAP=1 to skip and manage prerequisites yourself.)"
+    exit 1
+  fi
+
+  # npm globals used by pi + skills. `npm i -g` is idempotent and upgrades to latest.
+  NPM_GLOBALS=(
+    "@earendil-works/pi-coding-agent"  # the pi CLI itself
+    "lat.md"                            # knowledge-graph tool used per-project
+    "mcporter"                          # required by the mcporter skill
+  )
+  echo "==> npm install -g ${NPM_GLOBALS[*]}"
+  npm install -g "${NPM_GLOBALS[@]}"
+else
+  echo "==> SKIP_BOOTSTRAP=1, skipping brew + npm global installs"
+fi
+
+# ---------------------------------------------------------------------------
 # Preflight: git identity + push auth
 # ---------------------------------------------------------------------------
 WARNINGS=()
@@ -125,6 +151,9 @@ echo "╚═══════════════════════�
 echo
 echo "  1. Sign in to your model provider(s). API keys are NOT synced via dotpi."
 echo "        pi          # then run /login inside pi"
+echo
+echo "     Optional casks (install manually if you want them):"
+echo "        brew install --cask google-chrome   # for skills/web-browser"
 echo
 echo "  2. Reload the current pi session (or just start a new one):"
 echo "        /reload      # inside an existing pi session"
