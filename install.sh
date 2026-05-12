@@ -133,6 +133,47 @@ for entry in "$REPO_DIR/themes"/*.json; do
   link "$entry" "$PI_DIR/themes/$(basename "$entry")"
 done
 
+# ---------------------------------------------------------------------------
+# Apply local patches to globally-installed npm packages.
+# Each *.patch in patches/ targets one package by filename prefix
+# (e.g. pi-lean-ctx-*.patch -> applied inside `npm root -g`/pi-lean-ctx).
+# Uses `patch -p1 -N --dry-run` to skip already-applied patches silently.
+# ---------------------------------------------------------------------------
+if [[ -d "$REPO_DIR/patches" ]] && command -v npm >/dev/null 2>&1; then
+  NPM_GLOBAL_ROOT="$(npm root -g 2>/dev/null || true)"
+  if [[ -n "$NPM_GLOBAL_ROOT" ]]; then
+    shopt -s nullglob
+    for patch_file in "$REPO_DIR/patches"/*.patch; do
+      patch_base="$(basename "$patch_file" .patch)"
+      # Strip trailing -<rest> to get the package name (longest match wins).
+      pkg=""
+      for candidate in "$NPM_GLOBAL_ROOT"/*; do
+        cand_name="$(basename "$candidate")"
+        if [[ "$patch_base" == "$cand_name"-* && ${#cand_name} -gt ${#pkg} ]]; then
+          pkg="$cand_name"
+        fi
+      done
+      if [[ -z "$pkg" ]]; then
+        echo "!! patches/$patch_base.patch: no matching package under $NPM_GLOBAL_ROOT, skipping"
+        continue
+      fi
+      target="$NPM_GLOBAL_ROOT/$pkg"
+      if patch -p1 -N --dry-run -d "$target" < "$patch_file" >/dev/null 2>&1; then
+        echo "==> Patching $pkg with $(basename "$patch_file")"
+        patch -p1 -N -d "$target" < "$patch_file" >/dev/null
+      else
+        # Either already applied (silent skip) or doesn't apply at all (warn).
+        if patch -p1 -R --dry-run -d "$target" < "$patch_file" >/dev/null 2>&1; then
+          : # already applied
+        else
+          echo "!! patches/$(basename "$patch_file") does not apply to $pkg (upstream changed?)"
+        fi
+      fi
+    done
+    shopt -u nullglob
+  fi
+fi
+
 echo "==> Installing npm deps where needed"
 # Find any package.json under extensions/ or skills/ (one level deep into
 # subdirs, two levels for skills/<name>/scripts/) and run npm install.

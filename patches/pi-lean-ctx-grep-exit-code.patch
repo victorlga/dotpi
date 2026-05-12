@@ -1,0 +1,27 @@
+--- a/extensions/index.ts
++++ b/extensions/index.ts
+@@ -497,11 +497,21 @@
+       if (params.limit && params.limit > 0) searchArgs.push("-m", String(params.limit));
+       searchArgs.push(params.pattern, absolutePath);
+ 
+-      const output = await execLeanCtx(pi, ["-c", ...searchArgs]);
++      // Call lean-ctx directly so we can inspect the exit code:
++      // ripgrep exits 1 when there are no matches (not an error). Only code >= 2 is a real failure.
++      const bin = resolveBinary();
++      const result = await pi.exec(bin, ["-c", ...searchArgs], {
++        env: { ...process.env, LEAN_CTX_COMPRESS: "1" },
++      });
++      if (result.code >= 2) {
++        const msg = (result.stderr || result.stdout || `lean-ctx failed: grep ${params.pattern}`).trim();
++        throw new Error(msg);
++      }
++      const output = result.stdout;
+       const decorated = withFooter(output, { always: true });
+       return {
+-        content: [{ type: "text", text: decorated.text }],
+-        details: { path: absolutePath, pattern: params.pattern, source: "lean-ctx", compression: decorated.stats },
++        content: [{ type: "text", text: decorated.text || "(no matches)" }],
++        details: { path: absolutePath, pattern: params.pattern, source: "lean-ctx", exitCode: result.code, compression: decorated.stats },
+       };
+     },
+   });
