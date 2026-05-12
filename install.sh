@@ -22,7 +22,7 @@ mkdir -p "$PI_DIR/extensions" "$PI_DIR/skills" "$PI_DIR/prompts" "$PI_DIR/themes
 if [[ "${SKIP_BOOTSTRAP:-0}" != "1" ]]; then
   if command -v brew >/dev/null 2>&1; then
     echo "==> brew bundle"
-    brew bundle --file="$REPO_DIR/Brewfile" --no-lock
+    brew bundle --file="$REPO_DIR/Brewfile"
   else
     echo "!! Homebrew not found. Install it from https://brew.sh, then re-run."
     echo "   (Or set SKIP_BOOTSTRAP=1 to skip and manage prerequisites yourself.)"

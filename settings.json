@@ -5,7 +5,6 @@
   "defaultThinkingLevel": "medium",
   "theme": "dark",
   "packages": [
-    "npm:@sherif-fanous/pi-rtk",
     {
       "source": "git:github.com/tmustier/pi-extensions",
       "extensions": ["-pi-ralph-wiggum/index.ts"],
